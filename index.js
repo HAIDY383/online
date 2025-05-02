@@ -70,4 +70,4 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   }
 });
 
-client.login('NTE2MjE1Nzc5MDcxNjIzMTcw.Gex6Rm.UiSHO7n1GcLSO1A1PlAYV7UReqdluOPX1PJezc'); // Remember to replace 'your-token-here' with your actual bot token
+client.login('NTE2MjE1Nzc5MDcxNjIzMTcw.G3Pyr9.AS9Climt6Ul0Yn8bqHW2XJ6-X2kvCVdW3EF5RY'); // Remember to replace 'your-token-here' with your actual bot token
