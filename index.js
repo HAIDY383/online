@@ -22,7 +22,7 @@ const client = new Client({
 });
 
 const serverId = '970470272530542642';
-const voiceChannelId = '1265711225690390538';
+const voiceChannelId = '1166411014691115259';
 
 async function connectToVoiceChannel() {
   try {
