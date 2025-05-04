@@ -11,9 +11,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+app.listen(port);
 
 const client = new Client({
   intents: [
@@ -23,10 +21,10 @@ const client = new Client({
   ],
 });
 
-const serverId = '970470272530542642'; // Server ที่บอทต้องเข้าห้องเสียง
-const voiceChannelId = '1166411014691115259'; // ห้องเสียงเริ่มต้น
-const notifyServerId = '1273594630276911127'; // Server สำหรับส่งข้อความแจ้ง
-const notifyTextChannelId = '1367228382512943114'; // ห้องข้อความที่ใช้แจ้ง
+const serverId = '970470272530542642';
+const voiceChannelId = '1166411014691115259';
+const notifyServerId = '1273594630276911127';
+const notifyTextChannelId = '1367228382512943114';
 
 async function sendVoiceChannelNotification(message) {
   const notifyGuild = client.guilds.cache.get(notifyServerId);
@@ -38,13 +36,18 @@ async function sendVoiceChannelNotification(message) {
   }
 }
 
+async function updateBotStatus(channelName) {
+  const statusText = channelName ? `อยู่ในห้อง: ${channelName}` : `ไม่ได้อยู่ในห้อง`;
+  await client.user.setPresence({
+    activities: [{ name: statusText, type: 'PLAYING' }],
+    status: 'online',
+  });
+}
+
 async function connectToVoiceChannel() {
   try {
     const guild = client.guilds.cache.get(serverId);
-    if (!guild) {
-      console.error('Guild not found.');
-      return;
-    }
+    if (!guild) return;
 
     const channel = guild.channels.cache.get(voiceChannelId);
     if (channel && channel.isVoice()) {
@@ -54,11 +57,9 @@ async function connectToVoiceChannel() {
         adapterCreator: guild.voiceAdapterCreator,
       });
 
-      const message = `📢 เข้าห้องเสียง **${channel.name}** ในเซิร์ฟเวอร์ **${guild.name}** แล้ว`;
+      const message = `📢 เข้าห้องเสียง **${channel.name}** ในเซิร์เวอร์ **${guild.name}** แล้ว`;
       await sendVoiceChannelNotification(message);
-      console.log(message);
-    } else {
-      console.error("The specified channel ID is not a voice channel.");
+      await updateBotStatus(channel.name);
     }
   } catch (error) {
     console.error("Error connecting to voice channel:", error);
@@ -72,20 +73,19 @@ client.on('ready', async () => {
 
 client.on('voiceStateUpdate', async (oldState, newState) => {
   if (newState.member.id !== client.user.id) return;
-
   if (newState.guild.id !== serverId) return;
 
   if (!newState.channelId && oldState.channelId) {
     const leftChannel = oldState.channel;
-    const message = `📤 ออกจากห้องเสียง **${leftChannel.name}** ในเซิร์ฟเวอร์ **${leftChannel.guild.name}** แล้ว`;
+    const message = `📤 ออกจากห้องเสียง **${leftChannel.name}** ในเซิร์เวอร์ **${leftChannel.guild.name}** แล้ว`;
     await sendVoiceChannelNotification(message);
-    console.log(message);
-    await connectToVoiceChannel(); // เข้าห้องใหม่ถ้าหลุด
+    await updateBotStatus(null);
+    await connectToVoiceChannel();
   } else if (newState.channelId && newState.channelId !== oldState.channelId) {
     const newChannel = newState.channel;
-    const message = `📥 ย้ายไปห้องเสียง **${newChannel.name}** ในเซิร์ฟเวอร์ **${newChannel.guild.name}** แล้ว`;
+    const message = `📥 ย้ายไปห้องเสียง **${newChannel.name}** ในเซิร์เวอร์ **${newChannel.guild.name}** แล้ว`;
     await sendVoiceChannelNotification(message);
-    console.log(message);
+    await updateBotStatus(newChannel.name);
   }
 });
 
