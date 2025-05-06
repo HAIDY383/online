@@ -1,4 +1,5 @@
 // index.js
+
 const { Client, Intents } = require('discord.js-selfbot-v13');
 const { joinVoiceChannel } = require('@discordjs/voice');
 const express = require("express");
@@ -10,7 +11,9 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(port);
+app.listen(port, () => {
+  // server listening confirmation removed
+});
 
 const client = new Client({
   intents: [
@@ -25,8 +28,6 @@ const voiceChannelId = '1166411014691115259';
 const notifyServerId = '1273594630276911127';
 const notifyTextChannelId = '1367228382512943114';
 
-let isConnecting = false;
-
 async function sendVoiceChannelNotification(message) {
   const notifyGuild = client.guilds.cache.get(notifyServerId);
   if (!notifyGuild) return;
@@ -38,51 +39,25 @@ async function sendVoiceChannelNotification(message) {
 }
 
 async function connectToVoiceChannel() {
-  if (isConnecting) return;
-
   try {
     const guild = client.guilds.cache.get(serverId);
-    if (!guild) return;
-
-    const channel = guild.channels.cache.get(voiceChannelId);
-    if (!channel || !channel.isVoice()) return;
-
-    const isOccupied = channel.members.some(
-      member => member.id !== client.user.id
-    );
-
-    if (isOccupied) {
-      console.log('Voice channel is occupied. Waiting for it to be free...');
-
-      const interval = setInterval(() => {
-        const refreshed = guild.channels.cache.get(voiceChannelId);
-        const stillOccupied = refreshed.members.some(
-          member => member.id !== client.user.id
-        );
-
-        if (!stillOccupied) {
-          clearInterval(interval);
-          connectToVoiceChannel();
-        }
-      }, 5000);
+    if (!guild) {
       return;
     }
 
-    isConnecting = true;
+    const channel = guild.channels.cache.get(voiceChannelId);
+    if (channel && channel.isVoice()) {
+      joinVoiceChannel({
+        channelId: channel.id,
+        guildId: guild.id,
+        adapterCreator: guild.voiceAdapterCreator,
+      });
 
-    joinVoiceChannel({
-      channelId: channel.id,
-      guildId: guild.id,
-      adapterCreator: guild.voiceAdapterCreator,
-    });
-
-    const message = `📢 เข้าห้องเสียง **${channel.name}** ในเซิร์เวอร์ **${guild.name}** แล้ว`;
-    await sendVoiceChannelNotification(message);
-
+      const message = `📢 เข้าห้องเสียง **${channel.name}** ในเซิร์เวอร์ **${guild.name}** แล้ว`;
+      await sendVoiceChannelNotification(message);
+    }
   } catch (error) {
     console.error("Error connecting to voice channel:", error);
-  } finally {
-    isConnecting = false;
   }
 }
 
@@ -107,4 +82,4 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   }
 });
 
-client.login('NTE2MjE1Nzc5MDcxNjIzMTcw\.G3Pyr9.AS9Climt6Ul0Yn8bqHW2XJ6-X2kvCVdW3EF5RY'); // เปลี่ยน token!
+client.login('NTE2MjE1Nzc5MDcxNjIzMTcw.G3Pyr9.AS9Climt6Ul0Yn8bqHW2XJ6-X2kvCVdW3EF5RY');
