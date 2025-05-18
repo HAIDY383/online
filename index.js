@@ -21,8 +21,8 @@ const client = new Client({
 });
 
 // Config Constants
-const serverId = '970470272530542642';
-const voiceChannelId = '1166411014691115259';
+const serverId = '505974446914535426';
+const voiceChannelId = '537008058275069954';
 const notifyServerId = '1273594630276911127';
 const notifyTextChannelId = '1367228382512943114';
 
