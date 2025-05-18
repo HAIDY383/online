@@ -1,7 +1,7 @@
 {
-  "name": "nodejs",
-  "version": "1.0.0",
-  "description": "A Discord bot using discord.js-selfbot-v13",
+  "name": "discord-voice-selfbot",
+  "version": "1.0.1",
+  "description": "A Discord self-bot that joins a voice channel and updates status with notifications.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -9,14 +9,17 @@
   "keywords": [
     "discord",
     "bot",
-    "nodejs",
-    "selfbot"
+    "voice",
+    "selfbot",
+    "nodejs"
   ],
   "author": "Haidar AT",
-  "license": "ISC",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.9.0"
+  },
   "dependencies": {
     "@discordjs/voice": "^0.16.1",
-    "@types/node": "^18.0.6",
     "discord.js-selfbot-v13": "^3.4.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
