@@ -33,8 +33,8 @@ async function sendVoiceChannelNotification(message) {
   try {
     const notifyGuild = client.guilds.cache.get(notifyServerId);
     const notifyChannel = notifyGuild?.channels.cache.get(notifyTextChannelId);
-    if (notifyChannel?.type === ChannelType.GuildText) {
-      await notifyChannel.send(message);
+    if (typeof notifyChannel?.send === 'function') {
+  await notifyChannel.send(message);
     }
   } catch (err) {
     console.error("Notification error:", err);
