@@ -55,7 +55,7 @@ async function connectToVoiceChannel() {
     if (!guild) return console.error("Guild not found");
 
     const channel = guild.channels.cache.get(voiceChannelId);
-    if (!channel || channel.type !== ChannelType.GuildVoice) return console.error("Voice channel not found or not valid type");
+    if (!channel || channel.type !== 'GUILD_VOICE') return console.error("Voice channel not valid");
 
     if (currentVoiceChannelId === channel.id) return; // already connected
 
