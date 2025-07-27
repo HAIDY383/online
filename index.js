@@ -1,7 +1,7 @@
 // index.js
 
 require('dotenv').config();
-const { Client, Intents, ChannelType } = require('discord.js-selfbot-v13');
+const { Client, Intents } = require('discord.js-selfbot-v13');
 const { joinVoiceChannel } = require('@discordjs/voice');
 const express = require("express");
 
@@ -34,23 +34,12 @@ async function sendVoiceChannelNotification(message) {
     const notifyGuild = client.guilds.cache.get(notifyServerId);
     const notifyChannel = notifyGuild?.channels.cache.get(notifyTextChannelId);
     if (typeof notifyChannel?.send === 'function') {
-  await notifyChannel.send(message);
+      await notifyChannel.send(message);
     }
   } catch (err) {
     console.error("Notification error:", err);
   }
 }
-
-async function updateBotStatus(channelName, guildName) {
-  const statusText = channelName
-    ? `ห้อง: ${channelName} | เซิร์ฟ: ${guildName}`
-    : `ไม่ได้อยู่ในห้อง`;
-  await client.user.setPresence({
-    activities: [{ name: statusText, type: 'PLAYING' }],
-    status: 'online',
-  });
-}
-
 
 async function connectToVoiceChannel() {
   try {
@@ -70,8 +59,7 @@ async function connectToVoiceChannel() {
 
     currentVoiceChannelId = channel.id;
 
-    await sendVoiceChannelNotification(`📢 เข้าห้องเสียง **${channel.name}** ในเซิร์เวอร์ **${guild.name}** แล้ว`);
-    await updateBotStatus(channel.name, guild.name);
+    await sendVoiceChannelNotification(`📢 เข้าห้องเสียง **${channel.name}** ในเซิร์ฟเวอร์ **${guild.name}** แล้ว`);
   } catch (error) {
     console.error("Error connecting to voice channel:", error);
   }
@@ -79,6 +67,7 @@ async function connectToVoiceChannel() {
 
 client.on('ready', async () => {
   console.log(`${client.user.username} is online!`);
+  await client.user.setPresence({ status: 'online' }); // ตั้งค่าสถานะเป็น online โดยไม่มี activity
   await connectToVoiceChannel();
 });
 
@@ -87,13 +76,11 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
   if (!newState.channelId && oldState.channelId) {
     currentVoiceChannelId = null;
-    await sendVoiceChannelNotification(`📤 ออกจากห้องเสียง **${oldState.channel.name}** ในเซิร์เวอร์ **${oldState.guild.name}** แล้ว`);
-    await updateBotStatus(null);
-    await connectToVoiceChannel();
+    await sendVoiceChannelNotification(`📤 ออกจากห้องเสียง **${oldState.channel.name}** ในเซิร์ฟเวอร์ **${oldState.guild.name}** แล้ว`);
+    await connectToVoiceChannel(); // พยายามเชื่อมต่อใหม่หลังจากออกจากห้อง
   } else if (newState.channelId !== oldState.channelId) {
     currentVoiceChannelId = newState.channelId;
-    await sendVoiceChannelNotification(`📥 ย้ายไปห้องเสียง **${newState.channel.name}** ในเซิร์เวอร์ **${newState.guild.name}** แล้ว`);
-    await updateBotStatus(newState.channel.name, newState.guild.name);
+    await sendVoiceChannelNotification(`📥 ย้ายไปห้องเสียง **${newState.channel.name}** ในเซิร์ฟเวอร์ **${newState.guild.name}** แล้ว`);
   }
 });
 
