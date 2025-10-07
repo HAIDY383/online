@@ -1,27 +1,21 @@
 {
-  "name": "discord-voice-selfbot",
-  "version": "1.0.1",
-  "description": "A Discord self-bot that joins a voice channel and updates status with notifications.",
+  "name": "discord-selfbot-voice",
+  "version": "1.0.0",
+  "description": "Selfbot for staying in a Discord voice channel with auto reconnect",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [
-    "discord",
-    "bot",
-    "voice",
-    "selfbot",
-    "nodejs"
-  ],
-  "author": "Haidar AT",
+  "author": "haidar",
   "license": "MIT",
+  "dependencies": {
+    "@discordjs/voice": "^0.16.0",
+    "discord.js-selfbot-v13": "^1.0.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
   "engines": {
     "node": ">=16.9.0"
-  },
-  "dependencies": {
-    "@discordjs/voice": "^0.16.1",
-    "discord.js-selfbot-v13": "^3.4.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2"
   }
 }
