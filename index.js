@@ -1,7 +1,7 @@
-require('dotenv').config();
-const { Client } = require('discord.js-selfbot-v13');
-const { joinVoiceChannel } = require('@discordjs/voice');
-const express = require("express");
+import 'dotenv/config';
+import { Client } from 'discord.js-selfbot-v13';
+import { joinVoiceChannel } from '@discordjs/voice';
+import express from 'express';
 
 // Express Server
 const app = express();
