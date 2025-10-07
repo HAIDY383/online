@@ -1,5 +1,4 @@
 // index.js
-
 require('dotenv').config();
 const { Client, Intents } = require('discord.js-selfbot-v13');
 const { joinVoiceChannel } = require('@discordjs/voice');
@@ -8,58 +7,49 @@ const express = require("express");
 // Express Server Setup
 const app = express();
 const port = process.env.PORT || 3500;
-
-app.get('/', (_, res) => res.send('Hello World!'));
+app.get('/', (_, res) => res.send('Bot is running'));
 app.listen(port, () => console.log(`Express server listening on port ${port}`));
 
 // Discord Bot Setup
 const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MESSAGES,
     Intents.FLAGS.GUILD_VOICE_STATES,
   ],
 });
 
-// Config from .env
-const serverId = process.env.SERVER_ID;
-const voiceChannelId = process.env.VOICE_CHANNEL_ID;
-const notifyServerId = process.env.NOTIFY_SERVER_ID;
-const notifyTextChannelId = process.env.NOTIFY_TEXT_CHANNEL_ID;
+// Config
+const serverId = process.env.server;
+const id = process.env.id;
 
 let currentVoiceChannelId = null;
-
-async function sendVoiceChannelNotification(message) {
-  try {
-    const notifyGuild = client.guilds.cache.get(notifyServerId);
-    const notifyChannel = notifyGuild?.channels.cache.get(notifyTextChannelId);
-    if (typeof notifyChannel?.send === 'function') {
-      await notifyChannel.send(message);
-    }
-  } catch (err) {
-    console.error("Notification error:", err);
-  }
-}
 
 async function connectToVoiceChannel() {
   try {
     const guild = client.guilds.cache.get(serverId);
-    if (!guild) return console.error("Guild not found");
+    if (!guild) {
+      console.error("❌ Guild not found");
+      return;
+    }
 
-    const channel = guild.channels.cache.get(voiceChannelId);
-    if (!channel || channel.type !== 'GUILD_VOICE') return console.error("Voice channel not valid");
+    const channel = guild.channels.cache.get(id);
+    if (!channel || channel.type !== 'GUILD_VOICE') {
+      console.error("❌ Voice channel not valid");
+      return;
+    }
 
-    if (currentVoiceChannelId === channel.id) return; // already connected
+    if (currentVoiceChannelId === channel.id) return;
 
     joinVoiceChannel({
       channelId: channel.id,
       guildId: guild.id,
       adapterCreator: guild.voiceAdapterCreator,
+      selfDeaf: false,
+      selfMute: false,
     });
 
     currentVoiceChannelId = channel.id;
-
-    await sendVoiceChannelNotification(`📢 เข้าห้องเสียง **${channel.name}** ในเซิร์ฟเวอร์ **${guild.name}** แล้ว`);
+    console.log(`✅ Joined voice channel: ${channel.name}`);
   } catch (error) {
     console.error("Error connecting to voice channel:", error);
   }
@@ -67,21 +57,25 @@ async function connectToVoiceChannel() {
 
 client.on('ready', async () => {
   console.log(`${client.user.username} is online!`);
-  await client.user.setPresence({ status: 'online' }); // ตั้งค่าสถานะเป็น online โดยไม่มี activity
+  await client.user.setPresence({ status: 'online' });
   await connectToVoiceChannel();
-});
 
-client.on('voiceStateUpdate', async (oldState, newState) => {
-  if (newState.member.id !== client.user.id || newState.guild.id !== serverId) return;
+  // ตรวจสอบทุกๆ 10 วิ ว่ายังอยู่ในห้องหรือไม่
+  setInterval(async () => {
+    try {
+      const guild = client.guilds.cache.get(serverId);
+      const me = guild?.members.cache.get(client.user.id);
+      const currentChannelId = me?.voice?.channelId;
 
-  if (!newState.channelId && oldState.channelId) {
-    currentVoiceChannelId = null;
-    await sendVoiceChannelNotification(`📤 ออกจากห้องเสียง **${oldState.channel.name}** ในเซิร์ฟเวอร์ **${oldState.guild.name}** แล้ว`);
-    await connectToVoiceChannel(); // พยายามเชื่อมต่อใหม่หลังจากออกจากห้อง
-  } else if (newState.channelId !== oldState.channelId) {
-    currentVoiceChannelId = newState.channelId;
-    await sendVoiceChannelNotification(`📥 ย้ายไปห้องเสียง **${newState.channel.name}** ในเซิร์ฟเวอร์ **${newState.guild.name}** แล้ว`);
-  }
+      if (currentChannelId !== id) {
+        console.log("🔁 Bot is not in the target voice channel. Reconnecting...");
+        currentVoiceChannelId = null;
+        await connectToVoiceChannel();
+      }
+    } catch (err) {
+      console.error("Interval check error:", err);
+    }
+  }, 10000);
 });
 
 client.login(process.env.token);
