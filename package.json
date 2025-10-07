@@ -1,21 +1,18 @@
 {
-  "name": "discord-selfbot-voice",
+  "name": "discord-selfbot-server",
   "version": "1.0.0",
-  "description": "Selfbot for staying in a Discord voice channel with auto reconnect",
-  "main": "index.js",
-  "type": "module",
+  "description": "Selfbot Discord + Express",
+  "main": "index.cjs",
+  "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
-  },
-  "author": "haidar",
-  "license": "MIT",
-  "dependencies": {
-    "@discordjs/voice": "^0.16.0",
-    "discord.js-selfbot-v13": "^1.0.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2"
+    "start": "node index.cjs"
   },
   "engines": {
     "node": ">=16.9.0"
+  },
+  "dependencies": {
+    "discord.js-selfbot-v13": "^13.8.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
   }
 }
